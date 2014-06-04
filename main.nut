@@ -110,7 +110,7 @@ function AutonomousInstitutions::Start()
   if (AITile.IsBuildable(AIMap.GetTileIndex(x_a, y_a)) == false) {
     local i = 0;
     /* Look for Buildable North*/
-    for (i=0; i<5; i++) {
+    for (i=0; i<25; i++) {
       y_a = y_a + 1
       /* Check if tile is buildable, check if tile borders any road tiles*/
       if (AITile.IsBuildable(AIMap.GetTileIndex(x_a, y_a)) == true) {
@@ -125,7 +125,7 @@ function AutonomousInstitutions::Start()
       } 
     }
     /* Look for Buildable South*/
-    for (i=5; i<10; i++) {
+    for (i=25; i<50; i++) {
       y_a = y_a - 1
       /* Check if tile is buildable, check if tile borders any road tiles*/
       if (AITile.IsBuildable(AIMap.GetTileIndex(x_a, y_a)) == true) {
@@ -140,7 +140,7 @@ function AutonomousInstitutions::Start()
       }
     }
     /* Look for Buildable East*/
-    for (i=10; i<15; i++) {
+    for (i=50; i<75; i++) {
       x_a = x_a + 1
       /* Check if tile is buildable, check if tile borders any road tiles*/
       if (AITile.IsBuildable(AIMap.GetTileIndex(x_a, y_a)) == true) {
@@ -155,7 +155,7 @@ function AutonomousInstitutions::Start()
       }
     }
     /* Look for Buildable West*/
-    for (i=15; i<20; i++) {
+    for (i=75; i<100; i++) {
       x_a = x_a - 1
       /* Check if tile is buildable, check if tile borders any road tiles*/
       if (AITile.IsBuildable(AIMap.GetTileIndex(x_a, y_a)) == true) {
