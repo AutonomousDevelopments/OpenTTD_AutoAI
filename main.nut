@@ -11,6 +11,7 @@ function AutonomousInstitutions::Start()
     while (!AICompany.SetName("AutonomousInstitutions #" + i))
       i = i + 1;
   }
+  AILog.Info("Starting Road Module...")
   local townCount = AITown.GetTownCount()
   if (townCount < 2) {
     AILog.Info("Not Enough Towns to Build Network");
@@ -106,6 +107,7 @@ function AutonomousInstitutions::Start()
     AILog.Info(AIMap.GetTileX(AITown.GetLocation(townid_a)))
     AILog.Info(AIMap.GetTileY(AITown.GetLocation(townid_a)))
     /* Depot Module */
+    AILog.Info("Starting Depot Module...")
     local x_a = AIMap.GetTileX(AITown.GetLocation(townid_a));
     local y_a = AIMap.GetTileY(AITown.GetLocation(townid_a));
     local index_a = AIMap.GetTileIndex(x_a, y_a);
@@ -225,10 +227,196 @@ function AutonomousInstitutions::Start()
     } else {
       AILog.Info("Suitable Target Tile Fails Conditions")
     }
-    while (true) {
+    AILog.Info("Starting Station Module...")
+    /* Build Stations */
+    /* Build Station in Town A */
+    /* Set Coordinates for Town Center */
+    x_a = AIMap.GetTileX(AITown.GetLocation(townid_a));
+    y_a = AIMap.GetTileY(AITown.GetLocation(townid_a));
+    /* Check if Town Center is Valid, Check if Town Center is Road*/
+    if ((AIMap.IsValidTile(AIMap.GetTileIndex(x_a, y_a)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(x_a, y_a)) == true)) {
+      /* Check if Town Center is not Junction*/
+      AILog.Info("Checking if Town Center is not Junction...")
+      if (AIRoad.GetNeighbourRoadCount(AIMap.GetTileIndex(x_a, y_a)) == 2) {
+        /* See if Neighbor Road is East */
+        if ((AIMap.IsValidTile(AIMap.GetTileIndex(x_a + 1, y_a)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(x_a + 1, y_a)) == true)) {
+          AILog.Info("Building Station with neighbor road East")
+          AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(x_a, y_a), AIMap.GetTileIndex(x_a + 1, y_a), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+          /* See if Neighbor Road is West */
+        } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(x_a - 1, y_a)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(x_a - 1, y_a)) == true)) {
+          AILog.Info("Building Station with neighbor road West")
+          AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(x_a, y_a), AIMap.GetTileIndex(x_a - 1, y_a), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW);
+          /* See if Neighbor Road is North */
+        } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(x_a, y_a + 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(x_a, y_a + 1)) == true)) {
+          AILog.Info("Building Station with neighbor road North")
+          AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(x_a, y_a), AIMap.GetTileIndex(x_a, y_a + 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+          /* See if Neighbor Road is South */
+        } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(x_a, y_a - 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(x_a, y_a - 1)) == true)) {
+          AILog.Info("Building Station with neighbor road South")
+          AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(x_a, y_a), AIMap.GetTileIndex(x_a, y_a - 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+        }
+      } else {
+        /* Town Center is a Junction */
+        AILog.Info("Town Center is Junction...")
+        local i = 0
+        local stationBuilt = false;
+          /* Try to Find Non-Junction North */
+          for (i=0; i<5 && (stationBuilt == false); i++) {
+            y_a = y_a + 1
+            if (AIRoad.GetNeighbourRoadCount(AIMap.GetTileIndex(x_a, y_a)) < 3 && (stationBuilt == false)) {
+              t_x = x_a
+              t_y = y_a
+              t_index = AIMap.GetTileIndex(t_x, t_y);
+              AILog.Info("Found Non-Junction North of Town Center")
+              /* See if Neighbor Road is East */
+              if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x + 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x + 1, t_y) ) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is East")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x + 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is West */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is West")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x - 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is North */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is North")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y + 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW);
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is South */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is South")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y - 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+              }
+            } else {
+              break;
+            }
+          }
+          /* Try to Find Non-Junction South */
+          for (i=5; i<10 && (stationBuilt == false); i++) {
+            y_a = y_a - 1
+            if (AIRoad.GetNeighbourRoadCount(AIMap.GetTileIndex(x_a, y_a)) < 3 && (stationBuilt == false)) {
+              t_x = x_a
+              t_y = y_a
+              t_index = AIMap.GetTileIndex(t_x, t_y);
+              AILog.Info("Found Non-Junction South of Town Center")
+              /* See if Neighbor Road is East */
+              if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x + 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x + 1, t_y)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is East")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x + 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is West */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is West")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x - 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is North */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is North")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y + 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is South */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is South")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y - 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+              }
+            } else {
+              AILog.Info("No Non-Junctions South")
+            }
+          }
+
+          /* Try to Find Non-Junction East */
+          for (i=10; i<15 && (stationBuilt == false); i++) {
+          x_a = x_a + 1
+          if (AIRoad.GetNeighbourRoadCount(AIMap.GetTileIndex(x_a, y_a)) < 3 && (stationBuilt == false)) {
+              t_x = x_a
+              t_y = y_a
+              t_index = AIMap.GetTileIndex(t_x, t_y);
+              AILog.Info("Found Non-Junction East of Town Center")
+              /* See if Neighbor Road is East */
+              if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x + 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x + 1, t_y)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is East")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x + 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is West */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is West")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x - 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is North */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is North")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y + 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is South */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is South")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y - 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+              }
+            } else {
+              AILog.Info("No Non-Junctions East")
+            }
+          }
+
+          /* Try to Find Non-Junction West */
+          for (i=15; i<20 && (stationBuilt == false); i++) {
+          x_a = x_a - 1
+          if (AIRoad.GetNeighbourRoadCount(AIMap.GetTileIndex(x_a, y_a)) < 3 && (stationBuilt == false)) {
+              t_x = x_a
+              t_y = y_a
+              t_index = AIMap.GetTileIndex(t_x, t_y);
+              AILog.Info("Found Non-Junction West of Town Center")
+              /* See if Neighbor Road is East */
+              if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x + 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x + 1, t_y)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is East")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x + 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is West */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x - 1, t_y)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is West")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x - 1, t_y), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is North */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y + 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is North")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y + 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+                /* See if Neighbor Road is South */
+              } else if ((AIMap.IsValidTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (AIRoad.IsRoadTile(AIMap.GetTileIndex(t_x, t_y - 1)) == true) && (stationBuilt == false)) {
+                AILog.Info("Neighbor Road is South")
+                AIRoad.BuildDriveThroughRoadStation(AIMap.GetTileIndex(t_x, t_y), AIMap.GetTileIndex(t_x, t_y - 1), AIRoad.ROADVEHTYPE_BUS, AIStation.STATION_NEW)
+                stationBuilt = true
+                break;
+              }
+            } else {
+              AILog.Info("No Non-Junctions West")
+            }
+          }   
+      }
+      while (true) {
       AILog.Info("I am a very new AI with a ticker called AutonomousInstitutions and I am at tick " + this.GetTick());
       this.Sleep(50);
+      }
     }
-
+      /* Build Station in Town B */
+        /* Set Coordinates for Town Center */
   }
 }
